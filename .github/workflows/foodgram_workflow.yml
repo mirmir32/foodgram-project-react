@@ -33,20 +33,20 @@ jobs:
           - name: Login to Docker 
             uses: docker/login-action@v1 
             with:
-              username: ${{ secrets.MY_LOGIN }}
-              password: ${{ secrets.MY_PASS }}
+              username: ${{ secrets.DOCKER_LOGIN }}
+              password: ${{ secrets.DOCKER_PASS }}
           - name: Push to Docker Hub
             uses: docker/build-push-action@v2 
             with:
               context: backend/
               push: true
-              tags: themasterid/foodgram_backend:latest
+              tags: mir32/foodgram_backend:latest
           - name: Push frontend
             uses: docker/build-push-action@v2 
             with:
               context: frontend/
               push: true
-              tags: themasterid/foodgram_frontend:latest
+              tags: mir32/foodgram_frontend:latest
 
   deploy:
       if: ${{ github.ref }} == 'master'
@@ -61,8 +61,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull themasterid/foodgram_backend:latest
-            sudo docker pull themasterid/foodgram_frontend:latest
+            sudo docker pull mir32/foodgram_backend:latest
+            sudo docker pull mir32/foodgram_frontend:latest
             cd infra/
             sudo docker-compose stop
             sudo docker-compose rm backend
