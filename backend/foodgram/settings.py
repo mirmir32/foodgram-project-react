@@ -6,14 +6,12 @@ load_dotenv()
 BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = (
-    'SECRET_KEY',
-    'my_mega_secret_code_ilz@4zqj=rq&agdol^##zgl9(vs')
+SECRET_KEY = os.getenv('SECRET_KEY', default='secret_key')
 
-DEBUG = os.getenv('DEBUG', default='True') == 'True'
+DEBUG = os.getenv('DEBUG', default='True')
 
 ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', default='localhost').split(', ')
+    'ALLOWED_HOSTS', default='localhost').split(' ')
 
 AUTH_USER_MODEL = 'users.User'
 
