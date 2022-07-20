@@ -10,7 +10,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: 3.7
 
     - name: Install dependencies
       run: |
@@ -95,4 +95,4 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: ${{ github.workflow }} для репозитория ${{ github.repository }} успешно выполнен!
+        message: ${{ github.workflow }} ${{ github.repository }} успешно выполнен!

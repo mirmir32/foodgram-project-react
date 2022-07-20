@@ -37,7 +37,7 @@ class TokenSerializer(serializers.Serializer):
                     ERR_MSG,
                     code='authorization')
         else:
-            msg = 'Необходимо указать "адрес электронной почты" и "пароль".'
+            msg = 'Необходимо указать адрес электронной почты и пароль.'
             raise serializers.ValidationError(
                 msg,
                 code='authorization')
