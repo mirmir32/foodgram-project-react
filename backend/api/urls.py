@@ -7,11 +7,14 @@ from api.views import (AddAndDeleteSubscribe, AddDeleteFavoriteRecipe,
 
 app_name = 'api'
 
+# С v1 не по докам будет + может заруинить фронт, насколько я понял
+# По поводу фронта могу ошибаться :)
+
 router = DefaultRouter()
-router.register('users', UsersViewSet)
-router.register('tags', TagsViewSet)
-router.register('ingredients', IngredientsViewSet)
-router.register('recipes', RecipesViewSet)
+router.register('users', UsersViewSet, basename='users')
+router.register('tags', TagsViewSet, basename='tags')
+router.register('ingredients', IngredientsViewSet, basename='ingredients')
+router.register('recipes', RecipesViewSet, basename='recipes')
 
 
 urlpatterns = [

@@ -9,7 +9,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='secret_key')
 
 DEBUG = os.getenv('DEBUG', default='True')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', default='localhost').split(' ')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', default='localhost').split()
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework',
     'rest_framework.authtoken',
+    'colorfield',
     'django_filters',
 ]
 
@@ -134,3 +135,5 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'api.pagination.LimitPageNumberPagination',
     'PAGE_SIZE': 6,
 }
+
+EMPTY_VALUE_DISPLAY = '-пусто-'

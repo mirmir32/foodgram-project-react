@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_save
@@ -16,7 +17,7 @@ class Ingredient(models.Model):
         max_length=200)
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
@@ -29,19 +30,20 @@ class Tag(models.Model):
         'Имя',
         max_length=60,
         unique=True)
-    color = models.CharField(
-        'Цвет',
-        max_length=7,
+    color = ColorField(
+        format='hex',
+        verbose_name='Цвет',
+        help_text='Введите цвет тега',
         unique=True)
     slug = models.SlugField(
         'Ссылка',
-        max_length=100,
+        max_length=200,
         unique=True)
 
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
-        ordering = ['-id']
+        ordering = ('-id',)
 
     def __str__(self):
         return self.name
@@ -108,7 +110,7 @@ class RecipeIngredient(models.Model):
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
-        ordering = ['-id']
+        ordering = ('-id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
@@ -133,7 +135,7 @@ class Subscribe(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ['-id']
+        ordering = ('-id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -185,7 +187,7 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Покупка'
         verbose_name_plural = 'Покупки'
-        ordering = ['-id']
+        ordering = ('-id',)
 
     def __str__(self):
         list_ = [item['name'] for item in self.recipe.values('name')]

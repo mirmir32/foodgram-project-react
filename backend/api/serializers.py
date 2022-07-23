@@ -9,6 +9,7 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
 
 User = get_user_model()
 ERROR_MSG = 'Не удается войти в систему с предоставленными учетными данными.'
+AUTH_ERROR_MSG = 'Необходимо указать адрес электронной почты и пароль.'
 
 
 class TokenSerializer(serializers.Serializer):
@@ -37,9 +38,8 @@ class TokenSerializer(serializers.Serializer):
                     ERROR_MSG,
                     code='authorization')
         else:
-            msg = 'Необходимо указать адрес электронной почты и пароль.'
             raise serializers.ValidationError(
-                msg,
+                AUTH_ERROR_MSG,
                 code='authorization')
         attrs['user'] = user
         return attrs
@@ -151,7 +151,6 @@ class RecipeUserSerializer(
 
 
 class IngredientsEditSerializer(serializers.ModelSerializer):
-
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
@@ -198,7 +197,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def validate_cooking_time(self, cooking_time):
         if int(cooking_time) < 1:
             raise serializers.ValidationError(
-                'Время приготовления >= 1!')
+                'Время приготовления должно быть >= 1 минуты!')
         return cooking_time
 
     def validate_ingredients(self, ingredients):
