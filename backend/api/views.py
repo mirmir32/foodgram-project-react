@@ -10,7 +10,7 @@ from djoser.views import UserViewSet
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import generics, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
@@ -20,12 +20,13 @@ from rest_framework.permissions import (SAFE_METHODS, AllowAny,
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminOrReadOnly
+from api.mixins import (GetObjectMixin, ListCreateDestroyViewSet,
+                        PermissionAndPaginationMixin)
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Subscribe, Tag)
 from .serializers import (IngredientSerializer, RecipeReadSerializer,
-                          RecipeWriteSerializer, SubscribeRecipeSerializer,
-                          SubscribeSerializer, TagSerializer, TokenSerializer,
+                          RecipeWriteSerializer, SubscribeSerializer,
+                          TagSerializer, TokenSerializer,
                           UserCreateSerializer, UserListSerializer,
                           UserPasswordSerializer)
 
@@ -33,27 +34,8 @@ User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
 
 
-class GetObjectMixin:
-    """Миксин для удаления/добавления рецептов избранных/корзины."""
-    serializer_class = SubscribeRecipeSerializer
-    permission_classes = (AllowAny,)
-
-    def get_object(self):
-        recipe_id = self.kwargs['recipe_id']
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        self.check_object_permissions(self.request, recipe)
-        return recipe
-
-
-class PermissionAndPaginationMixin:
-    """Миксин для списка тегов и ингридиентов."""
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = None
-
-
 class AddAndDeleteSubscribe(
-        generics.RetrieveDestroyAPIView,
-        generics.ListCreateAPIView):
+        ListCreateDestroyViewSet):
     """Подписка и отписка от пользователя."""
     serializer_class = SubscribeSerializer
 
@@ -92,8 +74,7 @@ class AddAndDeleteSubscribe(
 
 class AddDeleteFavoriteRecipe(
         GetObjectMixin,
-        generics.RetrieveDestroyAPIView,
-        generics.ListCreateAPIView):
+        ListCreateDestroyViewSet):
     """Добавление и удаление рецепта в избранных."""
 
     def create(self, request, *args, **kwargs):
@@ -108,8 +89,7 @@ class AddDeleteFavoriteRecipe(
 
 class AddDeleteShoppingCart(
         GetObjectMixin,
-        generics.RetrieveDestroyAPIView,
-        generics.ListCreateAPIView):
+        ListCreateDestroyViewSet):
     """Добавление и удаление рецепта в корзине."""
 
     def create(self, request, *args, **kwargs):
@@ -208,10 +188,11 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(
-        detail=False,
-        methods=['get'],
-        permission_classes=(IsAuthenticated,))
+
+class DownloadShoppingCart(viewsets.ModelViewSet):
+    """ Сохранение файла списка покупок."""
+    permission_classes = [IsAuthenticated]
+
     def download_shopping_cart(self, request):
         """Скачивание списка с ингредиентами."""
         buffer = io.BytesIO()
