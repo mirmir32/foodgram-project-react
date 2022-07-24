@@ -24,7 +24,7 @@ from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import (SAFE_METHODS, AllowAny,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -189,8 +189,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-@action(detail=False, methods=['get'],
-        permission_classes=(IsAuthenticated,))
+@api_view(['GET', ])
+@permission_classes([IsAuthenticated])
 def download_shopping_cart(self, request):
     """Скачивание списка с ингредиентами."""
     buffer = io.BytesIO()
