@@ -1,2 +1,2 @@
 # praktikum_new_diplom
-Пока без деплоя.
+# 51.250.96.8/recipes

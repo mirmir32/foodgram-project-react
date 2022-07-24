@@ -20,15 +20,15 @@ from rest_framework.permissions import (SAFE_METHODS, AllowAny,
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
+from api.serializers import (IngredientSerializer, RecipeReadSerializer,
+                             RecipeWriteSerializer, SubscribeSerializer,
+                             TagSerializer, TokenSerializer,
+                             UserCreateSerializer, UserListSerializer,
+                             UserPasswordSerializer)
 from api.mixins import (GetObjectMixin, ListCreateDestroyViewSet,
                         PermissionAndPaginationMixin)
 from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
                             Subscribe, Tag)
-from .serializers import (IngredientSerializer, RecipeReadSerializer,
-                          RecipeWriteSerializer, SubscribeSerializer,
-                          TagSerializer, TokenSerializer,
-                          UserCreateSerializer, UserListSerializer,
-                          UserPasswordSerializer)
 
 User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
