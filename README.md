@@ -7,10 +7,6 @@ Foodgram, «Продуктовый помощник».
 
 Админка (login: admin, password: admin) - <http://51.250.96.8/admin/>
 
-API - <http://51.250.96.8/api/>
-
-Документация API - <http://51.250.96.8/api/docs/>
-
 
 ### Технологии
 - Python 3.7
@@ -20,16 +16,6 @@ API - <http://51.250.96.8/api/>
  - Docker
  - PostgreSQL
 
-# Шаблон наполнения env-файла
-
-    SECRET_KEY=<seckret_key>
-    ALLOWED_HOSTS=<allowed HOSTs>
-    DB_ENGINE=django.db.backends.postgresql
-    DB_NAME=<The name of the database, for example 'postgres'>
-    POSTGRES_USER=<Database user name, for example "postgres">
-    POSTGRES_PASSWORD=<Database user password>
-    DB_HOST=db
-    DB_PORT=5432
 
 # Запуск приложения в контейнерах Docker
 Клонируйте проект:
@@ -52,7 +38,7 @@ docker-compose exec backend python manage.py createsuperuser
 docker-compose exec backend python manage.py collectstatic --no-input
 ```
 
-Дополнительно можно наполнить DB ингредиентами и тэгами:
+Также можно наполнить DB ингредиентами и тэгами:
 
 ```bash
 sudo docker-compose exec backend python manage.py load_tags
@@ -69,4 +55,3 @@ sudo docker-compose exec backend python manage.py load_ingrs
     POSTGRES_PASSWORD=123456
     DB_HOST=db
     DB_PORT=5432
-```
