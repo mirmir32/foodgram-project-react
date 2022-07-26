@@ -24,7 +24,7 @@ Foodgram, «Продуктовый помощник».
 git clone https://github.com/mirmir32/foodgram-project-react.git
 
 ```
-Перейдите в папку infra и выполните команду, что бы собрать контейнер:
+Перейдите в папку infra, создайте .env файл (пример ниже) и выполните команду, что бы собрать контейнер:
 ```bash
 cd infra
 docker-compose up -d
