@@ -1,22 +1,18 @@
+import io
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.db.models.aggregates import Count, Sum
 from django.db.models.expressions import Exists, OuterRef, Value
-from django.http import HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.mixins import (GetObjectMixin, ListCreateDestroyViewSet,
                         PermissionAndPaginationMixin)
-from api.serializers import (IngredientSerializer, RecipeReadSerializer,
-                             RecipeWriteSerializer, SubscribeSerializer,
-                             TagSerializer, TokenSerializer,
-                             UserCreateSerializer, UserListSerializer,
-                             UserPasswordSerializer)
 from djoser.views import UserViewSet
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Subscribe, Tag)
-from reportlab.lib.pagesizes import A4
+from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
+                            Subscribe, Tag)
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
@@ -28,6 +24,11 @@ from rest_framework.permissions import (SAFE_METHODS, AllowAny,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+
+from .serializers import (IngredientSerializer, RecipeReadSerializer,
+                          RecipeWriteSerializer, SubscribeSerializer,
+                          TagSerializer, TokenSerializer, UserCreateSerializer,
+                          UserListSerializer, UserPasswordSerializer)
 
 User = get_user_model()
 FILENAME = 'shoppingcart.pdf'
@@ -187,50 +188,49 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request):
+        """Качаем список с ингредиентами."""
 
-class DownloadShoppingCart(viewsets.ModelViewSet):
-    """Сохранение файла списка покупок."""
-    permission_classes = [IsAuthenticated]
-
-    def download_pdf(self, result):
-        """Метод сохранения списка покупок в формате PDF."""
-        response = HttpResponse(content_type='application/pdf')
-        response[
-            'Content-Disposition'] = (
-                'attachment; filename="somefilename.pdf"')
-        p = canvas.Canvas(response, pagesize=A4)
-        left_position = 50
-        top_position = 700
-        pdfmetrics.registerFont(TTFont('FreeSans',
-                                       'recipes/fonts/FreeSans.ttf'))
-        p.setFont('FreeSans', 25)
-        p.drawString(left_position, top_position + 40, "Список покупок:")
-
-        for number, item in enumerate(result, start=1):
-            pdfmetrics.registerFont(
-                TTFont('Miama Nueva', 'recipes/fonts/Miama Nueva.ttf')
-                 )
-            p.setFont('Miama Nueva', 14)
-            p.drawString(
-                left_position,
-                top_position,
-                f'{number}.  {item["ingredient__name"]} - '
-                f'{item["ingredient_total"]}'
-                f'{item["ingredient__measurement_unit"]}'
-            )
-            top_position = top_position - 40
-
-        p.showPage()
-        p.save()
-        return response
-
-    def download(self, request):
-        """Скачивание списка покупок."""
-        result = RecipeIngredient.objects.filter(
-            recipe__cart__user=request.user).values(
-            'ingredient__name', 'ingredient__measurement_unit').order_by(
-                'ingredient__name').annotate(ingredient_total=Sum('amount'))
-        return self.download_pdf(result)
+        buffer = io.BytesIO()
+        page = canvas.Canvas(buffer)
+        pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+        x_position, y_position = 50, 800
+        shopping_cart = (
+            request.user.shopping_cart.recipe.
+            values(
+                'ingredients__name',
+                'ingredients__measurement_unit'
+            ).annotate(amount=Sum('recipe__amount')).order_by())
+        page.setFont('Vera', 14)
+        if shopping_cart:
+            indent = 20
+            page.drawString(x_position, y_position, 'Cписок покупок:')
+            for index, recipe in enumerate(shopping_cart, start=1):
+                page.drawString(
+                    x_position, y_position - indent,
+                    f'{index}. {recipe["ingredients__name"]} - '
+                    f'{recipe["amount"]} '
+                    f'{recipe["ingredients__measurement_unit"]}.')
+                y_position -= 15
+                if y_position <= 50:
+                    page.showPage()
+                    y_position = 800
+            page.save()
+            buffer.seek(0)
+            return FileResponse(
+                buffer, as_attachment=True, filename=FILENAME)
+        page.setFont('Vera', 24)
+        page.drawString(
+            x_position,
+            y_position,
+            'Cписок покупок пуст!')
+        page.save()
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=FILENAME)
 
 
 class TagsViewSet(

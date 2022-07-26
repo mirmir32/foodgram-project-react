@@ -205,9 +205,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Мин. 1 ингредиент в рецепте!')
         for ingredient in ingredients:
-            if int(ingredient.get('amount')) < 1:
+            if int(ingredient.get('amount')) <= 0:
                 raise serializers.ValidationError(
-                    'Количество ингредиента >= 1!')
+                    'Количество ингредиента должно быть >= 1!')
         return ingredients
 
     def create_ingredients(self, ingredients, recipe):
