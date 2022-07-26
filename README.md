@@ -1,8 +1,7 @@
+![foodgram-project-react Workflow ](https://github.com/mirmir32/foodgram-project-react/actions/workflows/workflow.yml/badge.svg?branch=master&event=push)
 # Проект Foodgram
 Foodgram, «Продуктовый помощник».
 Онлайн-сервис и API для него. На этом сервисе пользователи после регистрации могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать список продуктов, необходимых для приготовления выбранных блюд.
-
-![example workflow](https://github.com/mir32/foodgram-project-react/actions/workflows/workflow.yml/badge.svg)
 
 Проект доступен по следующему адресу: <http://51.250.96.8/recipes/>
 
@@ -36,7 +35,7 @@ API - <http://51.250.96.8/api/>
 Клонируйте проект:
 
 ```bash
-git clone https://github.com/mariao-max/foodgram-project-react.git
+git clone https://github.com/mirmir32/foodgram-project-react.git
 
 ```
 Перейдите в папку infra и выполните команду, что бы собрать контейнер:
@@ -60,7 +59,7 @@ sudo docker-compose exec backend python manage.py load_tags
 sudo docker-compose exec backend python manage.py load_ingrs
 ```
 
-# Шаблон наполнения env-файла
+## Шаблон наполнения env-файла
 
     SECRET_KEY=<seckret_key>
     ALLOWED_HOSTS=<allowed HOSTs>
