@@ -1,7 +1,6 @@
 import django.contrib.auth.password_validation as validators
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.hashers import make_password
-from django.shortcuts import get_object_or_404
 
 from drf_base64.fields import Base64ImageField
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Subscribe, Tag
@@ -174,24 +173,28 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('author',)
 
-    def validate(self, data):
-        ingredients = data['ingredients']
-        ingredient_list = []
-        for items in ingredients:
-            ingredient = get_object_or_404(
-                Ingredient, id=items['id'])
-            if ingredient in ingredient_list:
-                raise serializers.ValidationError(
-                    'Ингредиент должен быть уникальным!')
-            ingredient_list.append(ingredient)
-        tags = data['tags']
-        if not tags:
+    def validate_ingredients(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        if not ingredients:
             raise serializers.ValidationError(
-                'Нужен хотя бы один тэг для рецепта!')
-        for tag_name in tags:
-            if not Tag.objects.filter(name=tag_name).exists():
+                'Нужно выбрать минимум 1 ингридиент!')
+        for ingredient in ingredients:
+            if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError(
-                    f'Тэга {tag_name} не существует!')
+                    'Количество ингридиента должно быть положительным!')
+        ingredients_count = len(ingredients)
+        ingredients_set = len(
+            set([i['id'] for i in ingredients])
+        )
+        if ingredients_count > ingredients_set:
+            raise serializers.ValidationError(
+                'Ингредиенты не должны повторяться')
+        return data
+
+    def validate_cooking_time(self, data):
+        if data <= 0:
+            raise serializers.ValidationError(
+                'Время готовки не может быть отрицательным числом или нулем!')
         return data
 
     def validate_cooking_time(self, cooking_time):
@@ -199,16 +202,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Время приготовления должно быть >= 1 минуты!')
         return cooking_time
-
-    def validate_ingredients(self, ingredients):
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Мин. 1 ингредиент в рецепте!')
-        for ingredient in ingredients:
-            if int(ingredient.get('amount')) <= 0:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть >= 1!')
-        return ingredients
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
