@@ -176,6 +176,13 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         ingredients = data['ingredients']
         ingredient_list = []
+        if not ingredients:
+            raise serializers.ValidationError(
+                'Мин. 1 ингредиент в рецепте!')
+        for ingredient in ingredients:
+            if int(ingredient.get('amount')) < 1:
+                raise serializers.ValidationError(
+                    'Количество ингредиента должно быть >= 1!')
         for items in ingredients:
             ingredient = get_object_or_404(
                 Ingredient, id=items['id'])
@@ -193,40 +200,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                     f'Тэга {tag_name} не существует!')
         return data
 
-    def validate_amount(self, data):
-        """Валидация рецепта."""
-        ingredients = self.initial_data.get("ingredients")
-        ingredient_list = []
-        for ingredient_item in ingredients:
-            ingredient = get_object_or_404(
-                Ingredient, id=ingredient_item["id"])
-            ingredient_list.append(ingredient)
-            if int(ingredient_item["amount"]) < 1:
-                raise serializers.ValidationError(
-                    {
-                        "ingredients": (
-                            "Убедитесь, что значение количества ингр. > 0."
-                        )
-                    }
-                )
-        data["ingredients"] = ingredients
-        return data
-
     def validate_cooking_time(self, cooking_time):
         if int(cooking_time) < 1:
             raise serializers.ValidationError(
                 'Время приготовления должно быть >= 1!')
         return cooking_time
-
-    def validate_ingredients(self, ingredients):
-        if not ingredients:
-            raise serializers.ValidationError(
-                'Мин. 1 ингредиент в рецепте!')
-        for ingredient in ingredients:
-            if int(ingredient.get('amount')) < 1:
-                raise serializers.ValidationError(
-                    'Количество ингредиента должно быть >= 1!')
-        return ingredients
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
